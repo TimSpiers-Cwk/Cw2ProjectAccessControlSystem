@@ -110,7 +110,7 @@ def getAllLogs():
                 SuccessfulResult = cur.fetchone()
                 print("-> Log No. %s | Access: %s | User ID: %s | Name: %s %s | Using: %s | Date & Time: %s" % (row[0], row[4], row[1], SuccessfulResult[0], SuccessfulResult[1], RFIDorFing, row[2]))
             else:
-                print("-> Log No. %s | Access: %s | User not found | UsingL %s | Date & Time: %s" % (row[0], row[4], RFIDorFing, row[2]))
+                print("-> Log No. %s | Access: %s | User not found | Using: %s | Date & Time: %s" % (row[0], row[4], RFIDorFing, row[2]))
      
 
     
