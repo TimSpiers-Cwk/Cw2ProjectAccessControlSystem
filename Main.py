@@ -72,23 +72,27 @@ def ControlSystemLoop():
 		try:	
 			#Does Loop until fingerprint is read
 			while (fingerprintScanner.readImage() == False):
-				#Waits for RFID to be present
-				id, text = rfidReader.read_no_block()
-				#Needed because there are a bunch of spaces at the end of the token import
-				#cleaning up the text variable
+				#Checks if RFID is present infront of reader, does not pause
+				id, text = rfidReader.read_no_block()		
 				if id is None:
-					os.system('clear')
-					ControlSystemLoop()
-					break
+					pass
 				else:
+					#Needed because there are a bunch of spaces at the end of the token import
+					#cleaning up the text variable
 					text = text[:10]
-					user = getUserByRFID(text)
+					#Try catch block checks for RFID tags which may be empty, as that causes error and instead returns them as None
+					try:
+						user = getUserByRFID(text)
+					except:
+						user = None
+						pass
 					if user is None:
 						LCDMessage("Access", "Denied")
 						AddLog(0, 0,"Denied")
 						time.sleep(5)
 						os.system('clear')
 						LCDMessage("Waiting for", "Identification")
+						break
 					else:
 						#Opens door for 5 seconds and prints message on LCD, then Logs entry in DB and resets loop
 						DoorOpenClose(True)
@@ -97,31 +101,32 @@ def ControlSystemLoop():
 						time.sleep(5)
 						os.system('clear')
 						LCDMessage("Waiting for", "Identification")
-										
-			fingerprintScanner.convertImage(0x01)
-		
-			userID = CheckFingerprintPresent()
-			if userID is not None:
-				user = getUserByID(userID)
-				DoorOpenClose(True)
-				LCDMessage("Welcome","%s %s" % (user[1], user[2]))
-				AddLog(user[0], 1, "Granted")
-				time.sleep(5)
-				os.system('clear')
-				LCDMessage("Waiting for", "Identification")
+						break		
+			if(fingerprintScanner.readImage() == True):							
+				fingerprintScanner.convertImage(0x01)
+				userID = CheckFingerprintPresent()
+				if userID is not None:
+					user = getUserByID(userID)
+					DoorOpenClose(True)
+					LCDMessage("Welcome","%s %s" % (user[1], user[2]))
+					AddLog(user[0], 1, "Granted")
+					time.sleep(5)
+					os.system('clear')
+					LCDMessage("Waiting for", "Identification")
+					
+				else:
+					LCDMessage("Access", "Denied")
+					AddLog(0,0,"Denied")
+					time.sleep(5)
+					os.system('clear')
+					LCDMessage("Waiting for", "Identification")			
 			else:
-				LCDMessage("Access", "Denied")
-				AddLog(0,0,"Denied")
-				time.sleep(5)
-				os.system('clear')
-				LCDMessage("Waiting for", "Identification")
-								
+				continue						
 		except Exception as e:
 			print('Error occured with devices Exception message:' + str(e))
-			print("Returning to menu...")
+			print("Closing Application...")
 			time.sleep(2)
-			menu()
-
+			break
 #Allows for the user to search the DB by name to find user ID of user to remove		
 def removeByName():
 		print("Number 1 selected: Name")
