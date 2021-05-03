@@ -321,7 +321,7 @@ def enrollEnd():
 		os.system('clear')
 		menu()
 	elif choice == '2':
-		print("Enrolling another student")
+		print("Enrolling another user")
 		time.sleep(3)
 		os.system('clear')
 		enroll()
